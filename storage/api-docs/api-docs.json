@@ -1,0 +1,2098 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TechFuturist API Documentation",
+        "description": "![TechFuturist Logo](http://localhost:8000/images/images.png)\n * Documentation de l'API pour l'application TechFuturist",
+        "contact": {
+            "email": "support@techfuturist.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Serveur principal"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Ulrich"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Assogba"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ulrich@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user and get JWT",
+                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ulrich@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/verify-email": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify user email with OTP",
+                "operationId": "af6cac9e8cbada96c437ae2bc707a3be",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ulrich@example.com"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email verified"
+                    },
+                    "400": {
+                        "description": "Invalid or expired code"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Déconnexion de l'utilisateur",
+                "operationId": "79854151e609bd20032aa5aa4d5a35c0",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    },
+                    "401": {
+                        "description": "Token invalide ou manquant"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Liste des projets avec statistiques",
+                "description": "Retourne les projets accessibles à l'utilisateur selon ses permissions. Les Admins et Mentors voient tous les projets, les Participants uniquement les leurs.",
+                "operationId": "2ea4919d0a733012d5e30a9c60233aca",
+                "responses": {
+                    "200": {
+                        "description": "Liste des projets et statistiques",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "projects": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Project"
+                                            }
+                                        },
+                                        "total_submitted": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total_approved": {
+                                            "type": "integer",
+                                            "example": 4
+                                        },
+                                        "total_in_review": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "projects_this_month": {
+                                            "type": "integer",
+                                            "example": 2
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Créer un nouveau projet",
+                "description": "Seuls les utilisateurs avec le rôle Admin peuvent créer un projet.",
+                "operationId": "48ad9efff74ef8cbc32998fcb386e258",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "file"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Projet créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/participant": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Liste des projets de l'utilisateur connecté",
+                "description": "Si l'utilisateur est Admin ou Mentor, retourne tous les projets. Sinon, retourne uniquement ceux qu'il a soumis.",
+                "operationId": "60691ef8d3b7bebb71c86265e22df9fd",
+                "responses": {
+                    "200": {
+                        "description": "Liste des projets",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Project"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/admin/edit/{id}": {
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Modifier un projet (Admin/Mentor)",
+                "description": "Seuls les Admins et Mentors peuvent modifier n'importe quel projet.",
+                "operationId": "95516f88e92ff3a2195fcb1e16f81902",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "feedback": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Soumis",
+                                            "En Revue",
+                                            "Approuvé",
+                                            "Rejeté"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Projet mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Projet non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/participant/edit/{id}": {
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Modifier son propre projet",
+                "description": "Seuls les Participants peuvent modifier leurs propres projets, et uniquement si le statut est 'Soumis'.",
+                "operationId": "0328484e2a6c97838110366caab7625e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Projet mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Projet non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/download/{id}": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Télécharger un fichier de projet",
+                "description": "L'utilisateur doit avoir l'autorisation de voir le projet pour pouvoir télécharger son fichier.",
+                "operationId": "14f73168cdab105cafce2d25570b989d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Projet ou fichier non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/{id}": {
+            "delete": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Supprimer un projet",
+                "description": "Seuls les Admins peuvent supprimer n'importe quel projet. Les Participants peuvent supprimer leurs propres projets uniquement si le statut est 'Soumis'.",
+                "operationId": "9061d822d45e087b7bfd1a3a659c3ac2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Projet supprimé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Projet non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Liste des rapports avec statistiques (permissions via Policy)",
+                "description": "Retourne les rapports accessibles à l'utilisateur selon ses permissions. Les Admins et Mentors voient tous les rapports, les Participants uniquement les leurs.",
+                "operationId": "80011069564d5526ce3b7d26c9d39d3e",
+                "responses": {
+                    "200": {
+                        "description": "Liste des rapports et statistiques",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "reports": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Report"
+                                            }
+                                        },
+                                        "total_submitted": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total_approved": {
+                                            "type": "integer",
+                                            "example": 4
+                                        },
+                                        "total_in_review": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "reports_this_month": {
+                                            "type": "integer",
+                                            "example": 2
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Créer un nouveau rapport",
+                "description": "Seuls les utilisateurs avec le rôle Participant peuvent créer un rapport.",
+                "operationId": "29aded19207a3320fc6cae38962670fe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "file"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "submission_deadline": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rapport créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Report"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/participant": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Liste des rapports de l'utilisateur connecté",
+                "description": "Si l'utilisateur est Admin ou Mentor, retourne tous les rapports. Sinon, retourne uniquement ceux qu'il a soumis.",
+                "operationId": "fdbc4e34e1fe30e215716ff97e6ff348",
+                "responses": {
+                    "200": {
+                        "description": "Liste des rapports",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Report"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/admin/edit/{id}": {
+            "post": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Modifier un rapport (Admin/Mentor)",
+                "description": "Seuls les Admins et Mentors peuvent modifier n'importe quel rapport.",
+                "operationId": "75c92a9afa3e1d832025ab070af2a1b9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "submission_deadline": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "feedback": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Soumis",
+                                            "En Revue",
+                                            "Approuvé",
+                                            "Rejeté"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rapport mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Report"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Rapport non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/participant/edit/{id}": {
+            "post": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Modifier son propre rapport",
+                "description": "Seuls les Participants peuvent modifier leurs propres rapports, et uniquement si le statut est 'Soumis'.",
+                "operationId": "f6f4a2462f6659716f60c45752d49d07",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "submission_deadline": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rapport mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Report"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Rapport non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/download/{id}": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Télécharger un fichier de rapport",
+                "description": "L'utilisateur doit avoir l'autorisation de voir le rapport pour pouvoir télécharger son fichier.",
+                "operationId": "0ac753bd8ef99f026a5a63c12137a5c8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Rapport ou fichier non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/{id}": {
+            "delete": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Supprimer un rapport",
+                "description": "Seuls les Admins peuvent supprimer n'importe quel rapport. Les Participants peuvent supprimer leurs propres rapports uniquement si le statut est 'Soumis'.",
+                "operationId": "d7f52ededd2ce86929bc87b3df9346b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rapport supprimé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Rapport non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resources": {
+            "get": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Récupère toutes les ressources avec statistiques (Admin uniquement)",
+                "operationId": "6ec1827c29e12a5567ba377df35a82ec",
+                "responses": {
+                    "200": {
+                        "description": "Liste des ressources avec statistiques",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "resources": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Resource"
+                                            }
+                                        },
+                                        "total_resources": {
+                                            "type": "integer",
+                                            "example": 100
+                                        },
+                                        "published_resources": {
+                                            "type": "integer",
+                                            "example": 80
+                                        },
+                                        "total_downloads": {
+                                            "type": "integer",
+                                            "example": 2500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Crée une nouvelle ressource (Admin uniquement)",
+                "operationId": "846d6115fa12699a52e27b87bc05cb83",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "file_type",
+                                    "file"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Guide Laravel"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Un guide complet sur Laravel 10"
+                                    },
+                                    "file_type": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "pdf"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ressource créée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Resource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    },
+                    "403": {
+                        "description": "Accès interdit"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resources/{id}": {
+            "put": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Met à jour une ressource (Admin uniquement)",
+                "operationId": "1f0b00850bbb49af2def76e08835b076",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Guide Laravel mis à jour"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mise à jour du guide avec les dernières fonctionnalités"
+                                    },
+                                    "file_type": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "pdf"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ressource mise à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Resource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    },
+                    "403": {
+                        "description": "Accès interdit"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Supprime une ressource (Admin uniquement)",
+                "operationId": "41263949cef614080b6337bb44e32176",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ressource supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    },
+                    "403": {
+                        "description": "Accès interdit"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resources/download/{id}": {
+            "get": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Télécharge un fichier ressource",
+                "operationId": "c39eee02efcab3dd17456e73e19dac5d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "404": {
+                        "description": "Ressource ou fichier non trouvé"
+                    },
+                    "403": {
+                        "description": "Accès interdit"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tests": {
+            "get": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Liste de tous les tests",
+                "description": "Retourne la liste complète des tests. Accessible à tous les utilisateurs authentifiés.",
+                "operationId": "c111461571e8c1952d5ec29f6b79e9ce",
+                "responses": {
+                    "200": {
+                        "description": "Liste des tests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Test"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Créer un nouveau test",
+                "description": "Seuls les administrateurs peuvent créer un test.",
+                "operationId": "ce2fcda95b04246f42b319d2f2dce318",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "type",
+                                    "file",
+                                    "file_type"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Test QCM PHP"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description détaillée"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "QCM",
+                                            "Ouvert",
+                                            "Pratique"
+                                        ],
+                                        "example": "QCM"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "file_type": {
+                                        "type": "string",
+                                        "example": "pdf"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Test créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Test"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tests/{id}": {
+            "get": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Afficher un test spécifique",
+                "description": "Retourne les détails d'un test donné.",
+                "operationId": "280700573d2da846da72854c8b95aabc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du test",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du test",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Test"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Test non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Mettre à jour un test",
+                "description": "Seuls les administrateurs peuvent modifier un test.",
+                "operationId": "7fd12f63a4a495d43fde843fe17f3d30",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du test à modifier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Test QCM modifié"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Nouvelle description"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "QCM",
+                                            "Ouvert",
+                                            "Pratique"
+                                        ]
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "file_type": {
+                                        "type": "string",
+                                        "example": "pdf"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Test mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Test"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Test non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Supprimer un test",
+                "description": "Seuls les administrateurs peuvent supprimer un test.",
+                "operationId": "e05e41a3deb85323a1267599bbc9c472",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du test à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test supprimé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Test non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tests/download/{id}": {
+            "get": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Télécharger un test",
+                "description": "Tous les utilisateurs peuvent télécharger un test.",
+                "operationId": "9a0b1026c8608742d8bb1777edae068c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du test à télécharger",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Test ou fichier non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/participants": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all users (Admin only)",
+                "operationId": "2f4f3cc1a29c0cd8743b020cf7a3ff2a",
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get authenticated user information",
+                "operationId": "ea08752f32c0fd05c1a43fb4933e9870",
+                "responses": {
+                    "200": {
+                        "description": "Authenticated user data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/participants/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user by ID",
+                "operationId": "18f6230fe7b9e46fed35feadfa5cea5f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user details",
+                "operationId": "ea3a5b51f8447367b36b49c45e126a58",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Ulrich"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Assogba"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ulrich@example.com"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Participant",
+                                            "Mentor",
+                                            "Admin"
+                                        ],
+                                        "example": "Participant"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user",
+                "operationId": "8e829e6d41bc7e5974176c93f0fed1ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Authentication": {
+                "required": [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "role",
+                    "is_verified"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "Ulrich"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Assogba"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ulrich@example.com"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "Participant",
+                            "Mentor",
+                            "Admin"
+                        ],
+                        "example": "Participant"
+                    },
+                    "is_verified": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-10T15:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Project": {
+                "title": "Project",
+                "required": [
+                    "id",
+                    "title",
+                    "file_url",
+                    "file_type",
+                    "submitted_by",
+                    "submitted_at",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Plateforme de e-learning"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description du projet"
+                    },
+                    "file_url": {
+                        "type": "string",
+                        "example": "uploads/projects/abc123.zip"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "zip"
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "example": "Bon concept, à approfondir",
+                        "nullable": true
+                    },
+                    "submitted_by": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-08T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-09T12:00:00Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "Soumis",
+                            "En Revue",
+                            "Approuvé",
+                            "Rejeté"
+                        ],
+                        "example": "Soumis"
+                    }
+                },
+                "type": "object"
+            },
+            "Report": {
+                "title": "Report",
+                "required": [
+                    "id",
+                    "title",
+                    "file_url",
+                    "file_type",
+                    "submitted_by",
+                    "submitted_at",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Rapport d'avancement"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description du rapport"
+                    },
+                    "file_url": {
+                        "type": "string",
+                        "example": "uploads/reports/abc123.pdf"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf"
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "example": "Très bon travail",
+                        "nullable": true
+                    },
+                    "submission_deadline": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-12-31",
+                        "nullable": true
+                    },
+                    "submitted_by": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-08T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-09T12:00:00Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "Soumis",
+                            "En Revue",
+                            "Approuvé",
+                            "Rejeté"
+                        ],
+                        "example": "Soumis"
+                    }
+                },
+                "type": "object"
+            },
+            "Resource": {
+                "title": "Resource",
+                "required": [
+                    "id",
+                    "title",
+                    "file_url",
+                    "file_type",
+                    "uploaded_by"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Guide Laravel"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Un guide complet sur Laravel 10"
+                    },
+                    "file_url": {
+                        "type": "string",
+                        "example": "uploads/abc123.pdf"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf"
+                    },
+                    "uploaded_by": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "download_count": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-10T15:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Test": {
+                "title": "Test",
+                "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "file_url",
+                    "file_type",
+                    "created_by",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Test QCM sur PHP"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description détaillée du test",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "QCM",
+                            "Ouvert",
+                            "Pratique"
+                        ],
+                        "example": "QCM"
+                    },
+                    "file_url": {
+                        "type": "string",
+                        "example": "uploads/tests/abc123.pdf"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf"
+                    },
+                    "created_by": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-10T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-11T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "required": [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "role",
+                    "is_verified"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "Ulrich"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Assogba"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ulrich@example.com"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "Participant",
+                            "Mentor",
+                            "Admin"
+                        ],
+                        "example": "Participant"
+                    },
+                    "is_verified": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-10T15:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Gestion de l'authentification"
+        },
+        {
+            "name": "Projects",
+            "description": "Gestion des projets"
+        },
+        {
+            "name": "Reports",
+            "description": "Gestion des rapports"
+        },
+        {
+            "name": "Resources",
+            "description": "Gestion des ressources"
+        },
+        {
+            "name": "Tests",
+            "description": "Gestion des tests"
+        },
+        {
+            "name": "Users",
+            "description": "Gestion des utilisateurs"
+        }
+    ]
+}
