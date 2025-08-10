@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: api-techfuturists
+    env: php
+    rootDir: .
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan config:clear
+      php artisan route:clear
+      php artisan cache:clear
+      php artisan view:clear
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: base64:À_GÉNÉRER
+      - key: APP_DEBUG
+        value: false
