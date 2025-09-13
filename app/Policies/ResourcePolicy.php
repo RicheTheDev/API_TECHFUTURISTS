@@ -9,25 +9,21 @@ use App\Enums\RoleEnum;
 class ResourcePolicy
 {
     /**
-    * Détermine si l'utilisateur peut voir la liste des ressources.
-    * Ici, on autorise Admin, Mentor et Participant.
+     * Détermine si l'utilisateur peut voir la liste des ressources.
+     * Tous les rôles (Admin, Mentor, Participant) peuvent voir la liste.
      */
-        public function viewAny(User $user): bool
+    public function viewAny(User $user): bool
     {
-        return in_array($user->role, [
-            RoleEnum::Admin->value,
-            RoleEnum::Mentor->value,
-            RoleEnum::Participant->value,
-        ]);
+        return in_array($user->role->value, RoleEnum::getValues());
+        
     }
-
     /**
      * Détermine si l'utilisateur peut voir une ressource spécifique.
      * Tous les rôles peuvent voir une ressource.
      */
     public function view(User $user, Resource $resource): bool
     {
-        return in_array($user->role, RoleEnum::getValues());
+        return in_array($user->role->value, RoleEnum::getValues());
     }
 
     /**
@@ -36,7 +32,8 @@ class ResourcePolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === RoleEnum::Admin->value;
+
+        return $user->role === RoleEnum::Admin;
     }
 
     /**
@@ -45,7 +42,7 @@ class ResourcePolicy
      */
     public function update(User $user, Resource $resource): bool
     {
-        return $user->role === RoleEnum::Admin->value;
+        return $user->role === RoleEnum::Admin;
     }
 
     /**
@@ -54,6 +51,6 @@ class ResourcePolicy
      */
     public function delete(User $user, Resource $resource): bool
     {
-        return $user->role === RoleEnum::Admin->value;
+        return $user->role === RoleEnum::Admin;
     }
 }

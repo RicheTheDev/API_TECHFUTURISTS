@@ -562,6 +562,311 @@
                 ]
             }
         },
+        "/api/questions": {
+            "get": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Liste toutes les questions (tous rôles)",
+                "description": "Retourne la liste de toutes les questions accessibles. Tous les utilisateurs authentifiés peuvent consulter.",
+                "operationId": "ccfcac18661863efc025fb5e958cb3bd",
+                "responses": {
+                    "200": {
+                        "description": "Liste des questions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Question"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Créer une question (Admin uniquement)",
+                "description": "Seuls les Admins peuvent créer. Supporte l'upload de fichier (multipart/form-data).",
+                "operationId": "3b45a42bdad6eb1d4eb6cdd88fbdd3d5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "test_id"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "QCM",
+                                            "Ouvert"
+                                        ]
+                                    },
+                                    "options": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "correct_answer": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "test_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Question créée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Question"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/{id}": {
+            "get": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Détail d'une question (tous rôles)",
+                "description": "Retourne le détail d'une question. Tous les utilisateurs authentifiés peuvent consulter.",
+                "operationId": "d899529dc334e0fae06e945ff00bea1e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la question",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Question"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Question non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Mettre à jour une question (Admin uniquement)",
+                "description": "Seuls les Admins peuvent modifier. Supporte l'upload d'un nouveau fichier (multipart/form-data).",
+                "operationId": "bdbaa761ef073fa204c0ad9e0151fc4e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la question",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "text": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "QCM",
+                                            "Ouvert"
+                                        ]
+                                    },
+                                    "options": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "correct_answer": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "test_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Question mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Question"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Question non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Supprimer une question (Admin uniquement)",
+                "description": "Seuls les Admins peuvent supprimer une question. Supprime aussi le fichier associé s'il existe.",
+                "operationId": "12c5b45cc03b0643b3776bded072da33",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la question",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question supprimée"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Question non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/{id}/download": {
+            "get": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Télécharger le fichier d'une question (tous rôles)",
+                "description": "Tout utilisateur authentifié peut télécharger le fichier associé à une question s'il existe.",
+                "operationId": "76a6033bd6272a0d19403b132fb06678",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la question",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Fichier ou question non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/reports": {
             "get": {
                 "tags": [
@@ -1051,6 +1356,45 @@
             }
         },
         "/api/resources/{id}": {
+            "get": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Afficher une ressourec spécifique",
+                "description": "Retourne les détails d'une ressource donné.",
+                "operationId": "96e5a89f25a2c3e4aeb7a486e7b1da7f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID d'une ressource",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails d'une ressource",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Resource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ressource non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Resources"
@@ -1701,6 +2045,228 @@
                     }
                 ]
             }
+        },
+        "/api/user-test-results": {
+            "get": {
+                "tags": [
+                    "UserTestResults"
+                ],
+                "summary": "Liste des résultats accessibles à l'utilisateur",
+                "description": "Admin voit tous les résultats, les participants voient uniquement les leurs",
+                "operationId": "3400afd4f460628532b9ce4d5d84936a",
+                "responses": {
+                    "200": {
+                        "description": "Liste des résultats",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserTestResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "UserTestResults"
+                ],
+                "summary": "Créer un nouveau résultat (Admin seulement)",
+                "description": "Admin peut créer un résultat et uploader un fichier associé",
+                "operationId": "d1845702f7d599fc4cf4accd8ec356ca",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "score",
+                                    "user_id",
+                                    "test_id"
+                                ],
+                                "properties": {
+                                    "score": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    },
+                                    "test_id": {
+                                        "type": "integer"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Résultat créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserTestResult"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user-test-results/{id}": {
+            "put": {
+                "tags": [
+                    "UserTestResults"
+                ],
+                "summary": "Mettre à jour un résultat (Admin seulement)",
+                "operationId": "242f070444beef59d9f5b9cbca95b0b1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "score": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Résultat mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserTestResult"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Résultat non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "UserTestResults"
+                ],
+                "summary": "Supprimer un résultat (Admin seulement)",
+                "operationId": "1fdb4edca2c69f70cbe5655fb633bdc1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultat supprimé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Résultat non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user-test-results/{id}/download": {
+            "get": {
+                "tags": [
+                    "UserTestResults"
+                ],
+                "summary": "Télécharger le fichier associé à un résultat",
+                "operationId": "d076f8dd43ce46ae54da0b15d93bb97a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier téléchargé"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Fichier non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1818,6 +2384,74 @@
                             "Rejeté"
                         ],
                         "example": "Soumis"
+                    }
+                },
+                "type": "object"
+            },
+            "Question": {
+                "title": "Question",
+                "description": "Représentation d'une question attachée à un test",
+                "required": [
+                    "id",
+                    "type",
+                    "test_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "text": {
+                        "type": "string",
+                        "example": "Quelle est la capitale de la France ?",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "QCM",
+                            "Ouvert"
+                        ],
+                        "example": "QCM"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Paris"
+                        },
+                        "nullable": true
+                    },
+                    "correct_answer": {
+                        "type": "string",
+                        "example": "Paris",
+                        "nullable": true
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "uploads/questions/abc123.pdf",
+                        "nullable": true
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf",
+                        "nullable": true
+                    },
+                    "test_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-14T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-14T12:00:00Z"
                     }
                 },
                 "type": "object"
@@ -2059,6 +2693,59 @@
                     }
                 },
                 "type": "object"
+            },
+            "UserTestResult": {
+                "title": "UserTestResult",
+                "required": [
+                    "id",
+                    "score",
+                    "user_id",
+                    "test_id",
+                    "completed_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 85.5
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "uploads/results/abc123.pdf",
+                        "nullable": true
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf",
+                        "nullable": true
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "test_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-14T15:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -2079,6 +2766,10 @@
             "description": "Gestion des projets"
         },
         {
+            "name": "Questions",
+            "description": "Gestion des questions liées aux tests"
+        },
+        {
             "name": "Reports",
             "description": "Gestion des rapports"
         },
@@ -2093,6 +2784,10 @@
         {
             "name": "Users",
             "description": "Gestion des utilisateurs"
+        },
+        {
+            "name": "UserTestResults",
+            "description": "Gestion des résultats de tests utilisateurs"
         }
     ]
 }

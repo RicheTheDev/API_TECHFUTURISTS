@@ -106,7 +106,7 @@ class ReportController extends Controller
      *     ))
      * )
      */
-    public function participantReports()
+    public function show()
     {
         $this->authorize('viewAny', Report::class);
 

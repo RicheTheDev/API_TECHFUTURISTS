@@ -18,6 +18,15 @@ class Resource extends Model
         'is_published',
         'download_count',
     ];
+ 
+    protected $casts = [
+    'is_published' => 'boolean',
+];
+
+    public function setIsPublishedAttribute($value)
+    {
+        $this->attributes['is_published'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
 
     /**
      * Relation vers l'utilisateur qui a uploadé la ressource.

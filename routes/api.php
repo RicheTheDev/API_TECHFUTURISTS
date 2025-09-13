@@ -6,7 +6,8 @@ use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ResourceController;
 use App\Http\Controllers\API\ReportController;
 use App\Http\Controllers\API\ProjectController;
-use App\Http\Controllers\API\TestController;    
+use App\Http\Controllers\API\TestController;
+use App\Http\Controllers\API\QuestionController;  
 
 
 /*
@@ -37,6 +38,17 @@ Route::middleware(['auth.jwt'])->group(function () {
 
     // Infos utilisateur connecté
     Route::middleware('auth:api')->get('/me', [UserController::class, 'me']);
+
+    // Gestion des questions
+    Route::get('/questions/{id}/download', [QuestionController::class, 'download'])->name('questions.download');
+    Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
+    Route::get('/questions/{id}', [QuestionController::class, 'show']) ->name('questions.show');
+
+   // Gestion des résultats du participant
+    Route::get('/user-test-results', [UserTestResultController::class, 'index']);
+    Route::get('/user-test-results/{id}/download', [UserTestResultController::class, 'download']);
+
+
 });
 
 
@@ -45,7 +57,7 @@ Route::middleware(['auth.jwt'])->group(function () {
 | Routes Admin uniquement
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth.jwt', 'role:Admin'])->group(function () {
+Route::middleware(['auth.jwt'])->group(function () {
     Route::get('/admin/dashboard', [UserController::class, 'adminDashboard']);
     
     // Gestion des participants
@@ -60,7 +72,7 @@ Route::middleware(['auth.jwt', 'role:Admin'])->group(function () {
     Route::get('/resources/{id}', [ResourceController::class, 'show']);
     Route::put('/resources/{id}', [ResourceController::class, 'update']);
     Route::delete('/resources/{id}', [ResourceController::class, 'destroy']);
-    Route::get('/resources/{id}/download', [ResourceController::class, 'download']);
+    Route::get('/resources/download/{id}', [ResourceController::class, 'download']);
 
     // Gestion des rapports
     Route::get('/reports', [ReportController::class, 'index']); // Voir tous les rapports
@@ -74,6 +86,15 @@ Route::middleware(['auth.jwt', 'role:Admin'])->group(function () {
     Route::post('/tests', [TestController::class, 'store']);
     Route::put('/tests/{id}', [TestController::class, 'update']);
     Route::delete('/tests/{id}', [TestController::class, 'destroy']);
+
+    //Gestion des questions
+    Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
+    Route::post('/questions/{id}', [QuestionController::class, 'update'])->name('questions.update');
+    Route::delete('/questions/{id}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+
+    // Gestion des results du participant
+    Route::post('/user-test-results', [UserTestResultController::class, 'store']);
+    Route::put('/user-test-results/{id}', [UserTestResultController::class, 'update']);
 });
 
 /*
@@ -98,8 +119,8 @@ Route::middleware(['auth.jwt', 'role:Participant'])->group(function () {
     Route::get('/participant/dashboard', [UserController::class, 'participantDashboard']);
 
     // Accès aux ressources
-    Route::get('/resources', [ResourceController::class, 'index']);
-    Route::get('/resources/{id}', [ResourceController::class, 'show']);
+    // Route::get('/resources', [ResourceController::class, 'index']);
+    // Route::get('/resources/{id}', [ResourceController::class, 'show']);
     Route::get('/resources/{id}/download', [ResourceController::class, 'download']);
 
     // Gestion des rapports du participant

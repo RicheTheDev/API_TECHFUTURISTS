@@ -15,6 +15,17 @@ use App\Policies\ReportPolicy;
 use App\Models\Project;
 use App\Policies\ProjectPolicy;
 
+use App\Models\UserTestResult;
+use App\Policies\UserTestResultPolicy;
+
+use App\Models\Test;
+use App\Policies\TestPolicy;
+
+use App\Models\Question;
+use App\Policies\QuestionPolicy;
+
+
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -26,7 +37,10 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Resource::class => ResourcePolicy::class, // <-- Ajout de la ResourcePolicy
         Report::class => ReportPolicy::class,
-        Project::class => ProjectPolicy::class
+        Project::class => ProjectPolicy::class,
+        UserTestResult::class => UserTestResultPolicy::class,
+        Test::class => TestPolicy::class,
+        Question::class => QuestionPolicy::class
 
     ];
 

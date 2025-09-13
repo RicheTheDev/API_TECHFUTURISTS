@@ -3,8 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Tymon\JWTAuth\Http\Middleware\Authenticate as JwtAuthenticate;
+use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\JwtMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,9 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Middlewares globaux (si besoin)
-        
-        // Middlewares par nom (route middleware)
+        // ✅ Middlewares globaux
+        $middleware->append([
+            CorsMiddleware::class,
+        ]);
+
+        // ✅ Middlewares par nom (route middleware)
         $middleware->alias([
             'auth.jwt' => JwtMiddleware::class,
             'role' => RoleMiddleware::class,
@@ -24,4 +28,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();
+

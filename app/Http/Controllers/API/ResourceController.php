@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Auth\Access\AuthorizationException;
+use App\Policies\ResourcePolicy;
+use App\Enums\ResourceStatusEnum;
+use App\Http\Middleware\JwtMiddleware;
 
 /**
  * @OA\Tag(name="Resources", description="Gestion des ressources")
@@ -35,10 +38,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 class ResourceController extends Controller
 {
     use ApiResponseTrait;
-
     public function __construct()
     {
-        $this->middleware('auth:api');
+        $this->middleware(JwtMiddleware::class);
     }
 
     /**
@@ -107,17 +109,24 @@ class ResourceController extends Controller
      *     @OA\Response(response=422, description="Erreur de validation"),
      *     @OA\Response(response=403, description="Accès interdit")
      * )
-     */
-    public function store(Request $request)
+        */
+        public function store(Request $request)
     {
         $this->authorize('create', Resource::class);
+
+        // Convertir is_published en booléen si présent
+        if ($request->has('is_published')) {
+            $request->merge([
+                'is_published' => filter_var($request->is_published, FILTER_VALIDATE_BOOLEAN)
+            ]);
+        }
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'file_type' => 'required|string|max:50',
             'file' => 'required|file',
-            'is_published' => 'sometimes|boolean',
+            'is_published' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -135,7 +144,7 @@ class ResourceController extends Controller
                 'file_url' => $path,
                 'file_type' => $request->file_type,
                 'uploaded_by' => auth()->id(),
-                'is_published' => $request->boolean('is_published', false),
+                'is_published' => $request->input('is_published', false), // déjà converti en bool
                 'download_count' => 0,
             ]);
 
@@ -172,45 +181,59 @@ class ResourceController extends Controller
      * )
      */
     public function update(Request $request, $id)
-    {
-        try {
-            $resource = Resource::findOrFail($id);
-            $this->authorize('update', $resource);
+{
+    try {
+        $resource = Resource::findOrFail($id);
+        $this->authorize('update', $resource);
 
-            $validator = Validator::make($request->all(), [
-                'title' => 'nullable|string|max:255',
-                'description' => 'nullable|string',
-                'file_type' => 'nullable|string|max:50',
-                'file' => 'nullable|file',
-                'is_published' => 'sometimes|boolean',
-            ]);
+        // Validation des champs
+        $validator = Validator::make($request->all(), [
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'file_type' => 'nullable|string|max:50',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:10240',
+            'is_published' => 'nullable|boolean',
+        ]);
 
-            if ($validator->fails()) {
-                return $this->validationErrorResponse($validator->errors(), 'Erreur de validation');
-            }
-
-            if ($request->hasFile('file')) {
-                if ($resource->file_url && Storage::disk('public')->exists($resource->file_url)) {
-                    Storage::disk('public')->delete($resource->file_url);
-                }
-
-                $file = $request->file('file');
-                $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('uploads', $filename, 'public');
-                $resource->file_url = $path;
-            }
-
-            $resource->update($request->only(['title', 'description', 'file_type', 'is_published']));
-
-            return $this->updatedResponse($resource, 'Ressource mise à jour avec succès');
-        } catch (ModelNotFoundException $e) {
-            return $this->notFoundResponse('Ressource non trouvée');
-        } catch (AuthorizationException $e) {
-            return $this->forbiddenResponse("Vous n'avez pas la permission de modifier cette ressource");
-        } catch (\Exception $e) {
-            return $this->serverErrorResponse("Erreur serveur");
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors(), 'Erreur de validation');
         }
+
+        $data = $validator->validated();
+
+        // Convertir is_published en booléen si présent
+        if ($request->has('is_published')) {
+            $data['is_published'] = filter_var($request->is_published, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Gestion du fichier uploadé
+        if ($request->hasFile('file')) {
+            // Supprime l'ancien fichier si présent
+            if ($resource->file_url && Storage::disk('public')->exists($resource->file_url)) {
+                Storage::disk('public')->delete($resource->file_url);
+            }
+
+            // Stocke le nouveau fichier
+            $file = $request->file('file');
+            $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('uploads', $filename, 'public');
+
+            $data['file_url'] = $path;
+        }
+
+        // Remplit et sauvegarde toutes les valeurs validées
+        $resource->fill($data)->save();
+
+        return $this->updatedResponse($resource, 'Ressource mise à jour avec succès');
+
+    } catch (ModelNotFoundException $e) {
+        return $this->notFoundResponse('Ressource non trouvée');
+    } catch (AuthorizationException $e) {
+        return $this->forbiddenResponse("Vous n'avez pas la permission de modifier cette ressource");
+    } catch (\Exception $e) {
+        return $this->serverErrorResponse("Erreur serveur : " . $e->getMessage());
     }
+}
 
     /**
      * @OA\Get(
@@ -225,26 +248,29 @@ class ResourceController extends Controller
      * )
      */
     public function download($id)
-    {
-        try {
-            $resource = Resource::findOrFail($id);
-            $this->authorize('view', $resource);
+{
+    try {
+        $resource = Resource::findOrFail($id);
+        $this->authorize('view', $resource);
 
-            if (!$resource->file_url || !Storage::disk('public')->exists($resource->file_url)) {
-                return $this->notFoundResponse("Fichier non trouvé sur le serveur");
-            }
-
-            $resource->increment('download_count');
-
-            return response()->download(storage_path('app/public/' . $resource->file_url));
-        } catch (ModelNotFoundException $e) {
-            return $this->notFoundResponse('Ressource non trouvée');
-        } catch (AuthorizationException $e) {
-            return $this->forbiddenResponse("Vous n'avez pas la permission de télécharger cette ressource");
-        } catch (\Exception $e) {
-            return $this->serverErrorResponse("Erreur serveur");
+        // Vérifie si le fichier existe dans storage/app/public/...
+        if (!$resource->file_url || !Storage::disk('public')->exists($resource->file_url)) {
+            return $this->notFoundResponse("Fichier non trouvé sur le serveur");
         }
+
+        // Incrémenter le compteur de téléchargements
+        $resource->increment('download_count');
+
+        // Téléchargement via le disque public
+        return Storage::disk('public')->download($resource->file_url);
+    } catch (ModelNotFoundException $e) {
+        return $this->notFoundResponse('Ressource non trouvée');
+    } catch (AuthorizationException $e) {
+        return $this->forbiddenResponse("Vous n'avez pas la permission de télécharger cette ressource");
+    } catch (\Exception $e) {
+        return $this->serverErrorResponse("Erreur serveur : " . $e->getMessage());
     }
+}
 
     /**
      * @OA\Delete(
@@ -279,4 +305,40 @@ class ResourceController extends Controller
             return $this->serverErrorResponse("Erreur serveur");
         }
     }
+
+    /**
+ * @OA\Get(
+ *     path="/api/resources/{id}",
+ *     tags={"Resources"},
+ *     summary="Afficher une ressource spécifique",
+ *     description="Retourne les détails d'une ressource donnée.",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID d'une ressource",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Détails d'une ressource",
+ *         @OA\JsonContent(ref="#/components/schemas/Resource")
+ *     ),
+ *     @OA\Response(response=404, description="Ressource non trouvée")
+ * )
+ */
+    public function show($id)
+    {
+            $resource = Resource::find($id); // <- correction ici
+
+            if (!$resource) {
+                return $this->notFoundResponse('Ressource non trouvée.');
+            }
+
+            $this->authorize('view', $resource);
+
+            return $this->successResponse($resource);
+    }
+
 }

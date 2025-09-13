@@ -10,6 +10,7 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'success', // <-- type succès
             'message' => $message,
             'data'    => $data,
         ], $status);
@@ -19,15 +20,17 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'success',
             'message' => $message,
             'data'    => $data,
         ], $status);
     }
 
-    protected function deletedResponse(string $message = 'Opération accomplie', int $status = 204): JsonResponse
+    protected function deletedResponse(string $message = 'Opération accomplie', int $status = 200): JsonResponse
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'success',
             'message' => $message,
         ], $status);
     }
@@ -36,14 +39,17 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'success',
             'message' => $message,
             'data'    => $data,
         ], $status);
     }
+
     protected function validationErrorResponse($errors, string $message = 'La validation a échoué.', int $status = 422): JsonResponse
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'error', // <-- type erreur
             'message' => $message,
             'errors'  => $errors,
         ], $status);
@@ -53,6 +59,7 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'error',
             'message' => $message,
         ], $status);
     }
@@ -61,6 +68,7 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'error',
             'message' => $message,
         ], $status);
     }
@@ -69,6 +77,7 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'error',
             'message' => $message,
         ], $status);
     }
@@ -77,6 +86,7 @@ trait ApiResponseTrait
     {
         return response()->json([
             'status'  => $status,
+            'type'    => 'error',
             'message' => $message,
             'error'   => $error,
         ], $status);
